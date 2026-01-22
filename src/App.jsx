@@ -1,36 +1,104 @@
 import { useState, useEffect, useRef } from 'react';
+import Matter from 'matter-js';
 
 function App() {
   const [hasPermission, setHasPermission] = useState(false);
   const [needsPermission, setNeedsPermission] = useState(false);
+  const [positions, setPositions] = useState([]);
   const [gravity, setGravity] = useState({ x: 0, y: 1 });
-  const lettersRef = useRef([]);
-  const velocitiesRef = useRef([]);
-  const containerRef = useRef(null);
+  
+  const engineRef = useRef(null);
+  const bodiesRef = useRef([]);
   const animationRef = useRef(null);
   
   const text = "GRAVITY";
-  const letterCount = text.length;
-  
+  const containerWidth = 390;
+  const containerHeight = 600;
+  const fontSize = 48;
+  const letterSize = 44;
+
+  // Initialize Matter.js
   useEffect(() => {
-    const positions = [];
-    const velocities = [];
-    const startX = 150;
+    const { Engine, Bodies, Composite, Body } = Matter;
+    
+    // Create engine
+    const engine = Engine.create();
+    engine.gravity.x = 0;
+    engine.gravity.y = 1;
+    engineRef.current = engine;
+    
+    // Create walls
+    const wallThickness = 50;
+    const walls = [
+      // Bottom
+      Bodies.rectangle(containerWidth / 2, containerHeight + wallThickness / 2, containerWidth, wallThickness, { isStatic: true }),
+      // Top
+      Bodies.rectangle(containerWidth / 2, -wallThickness / 2, containerWidth, wallThickness, { isStatic: true }),
+      // Left
+      Bodies.rectangle(-wallThickness / 2, containerHeight / 2, wallThickness, containerHeight, { isStatic: true }),
+      // Right
+      Bodies.rectangle(containerWidth + wallThickness / 2, containerHeight / 2, wallThickness, containerHeight, { isStatic: true }),
+    ];
+    
+    Composite.add(engine.world, walls);
+    
+    // Create letter bodies
+    const letters = text.split('');
+    const startX = 80;
     const startY = 200;
-    const spacing = 48;
+    const spacing = 50;
     
-    for (let i = 0; i < letterCount; i++) {
-      positions.push({
-        x: startX + i * spacing,
-        y: startY + Math.random() * 20
-      });
-      velocities.push({ x: 0, y: 0 });
-    }
+    const bodies = letters.map((letter, i) => {
+      const body = Bodies.circle(
+        startX + i * spacing,
+        startY + Math.random() * 30,
+        letterSize / 2,
+        {
+          restitution: 0.6,
+          friction: 0.1,
+          frictionAir: 0.02,
+          label: letter,
+        }
+      );
+      return body;
+    });
     
-    lettersRef.current = positions;
-    velocitiesRef.current = velocities;
+    bodiesRef.current = bodies;
+    Composite.add(engine.world, bodies);
+    
+    // Animation loop
+    const update = () => {
+      Engine.update(engine, 1000 / 60);
+      
+      const newPositions = bodiesRef.current.map((body) => ({
+        x: body.position.x,
+        y: body.position.y,
+        angle: body.angle,
+        letter: body.label,
+      }));
+      
+      setPositions(newPositions);
+      animationRef.current = requestAnimationFrame(update);
+    };
+    
+    animationRef.current = requestAnimationFrame(update);
+    
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      Composite.clear(engine.world);
+      Engine.clear(engine);
+    };
   }, []);
-  
+
+  // Update gravity based on device orientation
+  useEffect(() => {
+    if (engineRef.current) {
+      engineRef.current.gravity.x = gravity.x;
+      engineRef.current.gravity.y = gravity.y;
+    }
+  }, [gravity]);
+
+  // Check permission
   useEffect(() => {
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -39,7 +107,7 @@ function App() {
       setHasPermission(true);
     }
   }, []);
-  
+
   const requestPermission = async () => {
     try {
       const response = await DeviceOrientationEvent.requestPermission();
@@ -50,7 +118,8 @@ function App() {
       console.error(e);
     }
   };
-  
+
+  // Listen to device orientation
   useEffect(() => {
     if (!hasPermission) return;
     
@@ -58,12 +127,12 @@ function App() {
       const { beta, gamma } = event;
       
       if (beta !== null && gamma !== null) {
-        const x = gamma / 45;
-        const y = beta / 45;
+        const x = (gamma / 90) * 2;
+        const y = (beta / 90) * 2;
         
         setGravity({
           x: Math.max(-2, Math.min(2, x)),
-          y: Math.max(-2, Math.min(2, y))
+          y: Math.max(-1, Math.min(3, y)),
         });
       }
     };
@@ -71,65 +140,7 @@ function App() {
     window.addEventListener('deviceorientation', handleOrientation);
     return () => window.removeEventListener('deviceorientation', handleOrientation);
   }, [hasPermission]);
-  
-  const [positions, setPositions] = useState([]);
-  
-  useEffect(() => {
-    const friction = 0.96;
-    const gravityStrength = 0.5;
-    const bounce = 0.6;
-    const containerWidth = 390;
-    const containerHeight = 600;
-    const letterSize = 40;
-    
-    const animate = () => {
-      const newPositions = [];
-      
-      for (let i = 0; i < letterCount; i++) {
-        if (!lettersRef.current[i]) continue;
-        
-        let { x, y } = lettersRef.current[i];
-        let vel = velocitiesRef.current[i] || { x: 0, y: 0 };
-        
-        vel.x += gravity.x * gravityStrength;
-        vel.y += gravity.y * gravityStrength;
-        
-        vel.x *= friction;
-        vel.y *= friction;
-        
-        x += vel.x;
-        y += vel.y;
-        
-        if (x < 0) {
-          x = 0;
-          vel.x *= -bounce;
-        }
-        if (x > containerWidth - letterSize) {
-          x = containerWidth - letterSize;
-          vel.x *= -bounce;
-        }
-        if (y < 0) {
-          y = 0;
-          vel.y *= -bounce;
-        }
-        if (y > containerHeight - letterSize) {
-          y = containerHeight - letterSize;
-          vel.y *= -bounce;
-        }
-        
-        lettersRef.current[i] = { x, y };
-        velocitiesRef.current[i] = vel;
-        newPositions.push({ x, y, letter: text[i] });
-      }
-      
-      setPositions([...newPositions]);
-      animationRef.current = requestAnimationFrame(animate);
-    };
-    
-    animationRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationRef.current);
-  }, [gravity]);
-  
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -164,13 +175,13 @@ function App() {
       )}
       
       <div 
-        ref={containerRef}
         style={{ 
           position: 'relative',
           backgroundColor: 'black',
-          width: 390, 
-          height: 600,
-          border: '1px solid rgba(255,255,255,0.1)'
+          width: containerWidth, 
+          height: containerHeight,
+          border: '1px solid rgba(255,255,255,0.1)',
+          overflow: 'hidden'
         }}
       >
         {positions.map((pos, i) => (
@@ -180,12 +191,14 @@ function App() {
               position: 'absolute',
               left: pos.x,
               top: pos.y,
-              fontSize: 48,
+              fontSize: fontSize,
               fontFamily: 'system-ui, -apple-system, sans-serif',
               fontWeight: 900,
               color: 'white',
               userSelect: 'none',
-              textShadow: '0 0 20px rgba(255,255,255,0.3)'
+              textShadow: '0 0 20px rgba(255,255,255,0.3)',
+              transform: `translate(-50%, -50%) rotate(${pos.angle}rad)`,
+              willChange: 'transform'
             }}
           >
             {pos.letter}
