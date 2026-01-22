@@ -12,7 +12,7 @@ function App() {
   const bodiesRef = useRef([]);
   const animationRef = useRef(null);
   
-  const text = "PRINKY-POLINKY";
+  const text = "Prinky-Polinky";
   const containerWidth = 390;
   const containerHeight = 700;
   const fontSize = 72;
