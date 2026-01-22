@@ -209,7 +209,23 @@ const bodies = letters.map((letter, i) => {
             {pos.letter}
           </span>
         ))}
-        
+        {/* Debug: show collision circles */}
+{positions.map((pos, i) => (
+  <div
+    key={`debug-${i}`}
+    style={{
+      position: 'absolute',
+      left: pos.x,
+      top: pos.y,
+      width: letterSize,
+      height: letterSize,
+      borderRadius: '50%',
+      border: '1px solid rgba(255, 0, 0, 0.5)',
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none'
+    }}
+  />
+))}
         <div style={{
           position: 'absolute',
           bottom: 16,
