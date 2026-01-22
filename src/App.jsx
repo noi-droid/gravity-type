@@ -12,11 +12,11 @@ function App() {
   const bodiesRef = useRef([]);
   const animationRef = useRef(null);
   
-  const text = "HELLO";
+  const text = "PRINKY-POLINKY";
   const containerWidth = 390;
-  const containerHeight = 600;
-  const fontSize = 48;
-  const letterSize = 44;
+  const containerHeight = 700;
+  const fontSize = 72;
+  const letterSize = 68;
 
   // Initialize Matter.js
   useEffect(() => {
