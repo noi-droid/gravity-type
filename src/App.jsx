@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Matter from 'matter-js';
 
+
 function App() {
   const [hasPermission, setHasPermission] = useState(false);
   const [needsPermission, setNeedsPermission] = useState(false);
@@ -11,7 +12,7 @@ function App() {
   const bodiesRef = useRef([]);
   const animationRef = useRef(null);
   
-  const text = "GRAVITY";
+  const text = "HELLO";
   const containerWidth = 390;
   const containerHeight = 600;
   const fontSize = 48;
@@ -163,7 +164,7 @@ function App() {
             padding: '12px 24px',
             backgroundColor: 'white',
             color: 'black',
-            fontFamily: 'monospace',
+            fontFamily: '"OTR Grotesk", system-ui, sans-serif',
             fontSize: 14,
             letterSpacing: '0.05em',
             border: 'none',
@@ -192,7 +193,7 @@ function App() {
               left: pos.x,
               top: pos.y,
               fontSize: fontSize,
-              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontFamily: '"OTR Grotesk", system-ui, sans-serif',
               fontWeight: 900,
               color: 'white',
               userSelect: 'none',
@@ -210,7 +211,7 @@ function App() {
           bottom: 16,
           left: 16,
           color: 'rgba(255,255,255,0.4)',
-          fontFamily: 'monospace',
+          fontFamily: '"OTR Grotesk", system-ui, sans-serif',
           fontSize: 12
         }}>
           <div>x: {gravity.x.toFixed(2)}</div>
@@ -222,7 +223,7 @@ function App() {
         <p style={{
           marginTop: 24,
           color: 'rgba(255,255,255,0.4)',
-          fontFamily: 'monospace',
+          fontFamily: '"OTR Grotesk", system-ui, sans-serif',
           fontSize: 12,
           textAlign: 'center',
           maxWidth: 320
