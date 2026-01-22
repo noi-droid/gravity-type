@@ -190,29 +190,8 @@ const bodies = letters.map((letter, i) => {
         }}
       >
         {positions.map((pos, i) => (
-          <span
-            key={i}
-            style={{
-              position: 'absolute',
-              left: pos.x,
-              top: pos.y,
-              fontSize: fontSize,
-              fontFamily: '"OTR Grotesk", system-ui, sans-serif',
-              fontWeight: 900,
-              color: 'white',
-              userSelect: 'none',
-              textShadow: '0 0 20px rgba(255,255,255,0.3)',
-              transform: `translate(-50%, -50%) rotate(${pos.angle}rad)`,
-              willChange: 'transform'
-            }}
-          >
-            {pos.letter}
-          </span>
-        ))}
-        {/* Debug: show collision circles */}
-{positions.map((pos, i) => (
   <div
-    key={`debug-${i}`}
+    key={i}
     style={{
       position: 'absolute',
       left: pos.x,
@@ -220,12 +199,28 @@ const bodies = letters.map((letter, i) => {
       width: letterSize,
       height: letterSize,
       borderRadius: '50%',
-      border: '1px solid rgba(255, 0, 0, 0.5)',
-      transform: 'translate(-50%, -50%)',
-      pointerEvents: 'none'
+      backgroundColor: 'white',
+      transform: `translate(-50%, -50%) rotate(${pos.angle}rad)`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      willChange: 'transform'
     }}
-  />
+  >
+    <span
+      style={{
+        fontSize: fontSize,
+        fontFamily: '"OTR Grotesk", system-ui, sans-serif',
+        fontWeight: 900,
+        color: 'black',
+        userSelect: 'none',
+      }}
+    >
+      {pos.letter}
+    </span>
+  </div>
 ))}
+        
         <div style={{
           position: 'absolute',
           bottom: 16,
