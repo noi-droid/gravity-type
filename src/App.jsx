@@ -45,14 +45,18 @@ function App() {
     
     // Create letter bodies
     const letters = text.split('');
-    const startX = 80;
-    const startY = 200;
-    const spacing = 50;
-    
-    const bodies = letters.map((letter, i) => {
-      const body = Bodies.circle(
-        startX + i * spacing,
-        startY + Math.random() * 30,
+const startX = 60;
+const startY = 150;
+const spacing = 40;
+const charsPerRow = 6;
+
+const bodies = letters.map((letter, i) => {
+  const row = Math.floor(i / charsPerRow);
+  const col = i % charsPerRow;
+  
+  const body = Bodies.circle(
+    startX + col * spacing,
+    startY + row * 80 + Math.random() * 20,
         letterSize / 2,
         {
           restitution: 0.6,
