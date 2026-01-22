@@ -47,7 +47,7 @@ function App() {
     const letters = text.split('');
 const startX = 60;
 const startY = 150;
-const spacing = 40;
+const spacing = 4;
 const charsPerRow = 6;
 
 const bodies = letters.map((letter, i) => {
